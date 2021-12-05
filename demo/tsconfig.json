@@ -1,0 +1,13 @@
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+      "target": "es2018",
+      "baseUrl": "..",
+      "rootDir": "..",
+      "lib": ["dom"],
+      "paths": {
+        "p4robots": ["src"]
+      }
+    },
+    "include": ["fuse.ts", "src/**/*.ts", "src/imgs/**"]
+  }

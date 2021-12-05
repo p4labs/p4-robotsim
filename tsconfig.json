@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "removeComments": false,
+    "experimentalDecorators": true,
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "declaration": true,
+    "noEmitOnError": true,
+    "strict": false,
+    "allowJs": true,
+    "rootDir": "src",
+    "outDir": "dist/esm",
+    "lib": ["es2017","dom"]
+  },
+  "include": ["src/**/*.ts", "src/robots/utils/raycast_es6.js", "src/imgs/*"],
+  "exclude": ["src/**/*.spec.ts",    
+    ".git",
+    "node_modules"]
+}

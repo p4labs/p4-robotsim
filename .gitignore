@@ -1,0 +1,10 @@
+.cache
+.history
+.idea
+node_modules
+dist
+build
+*.log
+storybook-static
+custom-elements.json
+.DS_STORE
