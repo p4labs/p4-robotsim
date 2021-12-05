@@ -4,5 +4,5 @@
 
 ## Running the demo project
 
-To run the demo project, check out this repository, run `npm install` and then `npm start`.
+To run the demo project, check out this repository, run `yarn install` and then `yarn start`.
 
