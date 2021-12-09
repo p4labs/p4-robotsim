@@ -26,7 +26,7 @@ export class TwoWheelRobot {
     coins : Array<Body>;
     removedCoins : Array<Body> = [];
 
-    static readonly forceMultiplier = 0.01;
+    static readonly forceMultiplier = 0.08;
     leftWheelSpeed : number;
     rightWheelSpeed : number;
     background : string;
@@ -45,13 +45,16 @@ export class TwoWheelRobot {
             canvas: this._canvas,
             engine: this._engine,
             options: {
-              width: 800,
-              height: 800,
-              wireframes: false,
-              background: this.background,
-                showAngleIndicator: false
+                width: 800,
+                height: 800,
+                wireframes: false,
+                background: this.background,
+                showAngleIndicator: false,
+                showConvexHulls: false,
+                showVelocity: false,
+                showPositions: false
             }
-          });
+        });
 
         this._runner = Runner.create();
 
@@ -69,12 +72,11 @@ export class TwoWheelRobot {
         this.ultrasonicSensor = createPartCircle(110,-30, 50,200, -3*Math.PI/7,{label: 'ultrasonic'});
         this.ultrasonicSensor.isSensor = true;
         this.ultrasonicSensor.render.opacity = 0.2;
-        this.ultrasonicSensor.mass = 0;
-        this.ultrasonicSensor.area =  0;
+        Body.setDensity(this.ultrasonicSensor, 0);
         //create the robot from parts
-        this.robot = Body.create({parts: [this.ultrasonicSensor,this.robotBody, this.leftWheelBody, this.rightWheelBody]});
-        this.robot.frictionAir = 0.1;
-        Body.setMass(this.robot, 10000);
+        this.robot = Body.create({parts: [this.robotBody, this.leftWheelBody, this.rightWheelBody, this.ultrasonicSensor,]});
+        this.robot.frictionAir = 0.2;
+        Body.setMass(this.robot, 100000);
         this.robotInitialPosition = robotInitialPosition;
         this.robotInitialAngle = robotInitialAngle;
 
@@ -95,10 +97,10 @@ export class TwoWheelRobot {
                 if((bodyA.label ==='ultrasonic' && bodyB.label === 'obstacle') ||
                     (bodyB.label === 'ultrasonic' && bodyA.label === 'obstacle'))
                 {
-                   self.ultrasonicSensorDistance = TwoWheelRobot.maxUltrasonicDistance;
+                    self.ultrasonicSensorDistance = TwoWheelRobot.maxUltrasonicDistance;
                 }
             })
-});
+        });
 
 
     }
@@ -172,39 +174,39 @@ export class TwoWheelRobot {
     private once = 0;
     applyForces() : void {
 
-    const leftForcePosition = getTranformedPoint(this.robotBody.position, this.robot.angle, 0, -50);
-    const rightForcePosition = getTranformedPoint(this.robotBody.position, this.robot.angle, 0, 50);
+        const leftForcePosition = getTranformedPoint(this.robotBody.position, this.robot.angle, 0, -20);
+        const rightForcePosition = getTranformedPoint(this.robotBody.position, this.robot.angle, 0, 20);
 
-    let leftWheelForce = Vector.create(TwoWheelRobot.forceMultiplier*Math.abs(this.leftWheelSpeed), 0);
-    leftWheelForce = Vector.rotate(leftWheelForce, this.robot.angle);
-    if(this.leftWheelSpeed < 0)
-        leftWheelForce = Vector.neg(leftWheelForce);
+        let leftWheelForce = Vector.create(TwoWheelRobot.forceMultiplier*Math.abs(this.leftWheelSpeed), 0);
+        leftWheelForce = Vector.rotate(leftWheelForce, this.robot.angle);
+        if(this.leftWheelSpeed < 0)
+            leftWheelForce = Vector.neg(leftWheelForce);
 
-    let rightWheelForce = Vector.create(TwoWheelRobot.forceMultiplier*Math.abs(this.rightWheelSpeed), 0);
-    rightWheelForce = Vector.rotate(rightWheelForce, this.robot.angle);
-    if(this.rightWheelSpeed < 0)
-        rightWheelForce = Vector.neg(rightWheelForce);
+        let rightWheelForce = Vector.create(TwoWheelRobot.forceMultiplier*Math.abs(this.rightWheelSpeed), 0);
+        rightWheelForce = Vector.rotate(rightWheelForce, this.robot.angle);
+        if(this.rightWheelSpeed < 0)
+            rightWheelForce = Vector.neg(rightWheelForce);
 /*
-  if( Math.floor(Math.random() * 10) == 0) {
+          if( Math.floor(Math.random() * 10) == 0) {
 
-      const circle = Bodies.circle(leftForcePosition.x, leftForcePosition.y, 3,{isSensor: true});
-      const circle2 = Bodies.circle(leftForcePosition.x + leftWheelForce.x*100000, leftForcePosition.y + leftWheelForce.y*100000, 3, {isSensor:true});
+              const circle = Bodies.circle(leftForcePosition.x, leftForcePosition.y, 3,{isSensor: true});
+              const circle2 = Bodies.circle(leftForcePosition.x + leftWheelForce.x*100000, leftForcePosition.y + leftWheelForce.y*100000, 3, {isSensor:true});
 
-      World.add(this._engine.world, circle);
-        World.add(this._engine.world, circle2);
+              World.add(this._engine.world, circle);
+                World.add(this._engine.world, circle2);
 
-      const circle3 = Bodies.circle(rightForcePosition.x, rightForcePosition.y, 3,{isSensor: true});
-      const circle4 = Bodies.circle(rightForcePosition.x + rightWheelForce.x*100000, rightForcePosition.y + rightWheelForce.y*100000, 3, {isSensor:true});
+              const circle3 = Bodies.circle(rightForcePosition.x, rightForcePosition.y, 3,{isSensor: true});
+              const circle4 = Bodies.circle(rightForcePosition.x + rightWheelForce.x*100000, rightForcePosition.y + rightWheelForce.y*100000, 3, {isSensor:true});
 
-      World.add(this._engine.world, circle3);
-      World.add(this._engine.world, circle4);
+              World.add(this._engine.world, circle3);
+              World.add(this._engine.world, circle4);
 
-      console.log("right", this.rightWheelSpeed, rightForcePosition, rightWheelForce);
-      console.log("left",this.leftWheelSpeed, leftForcePosition, leftWheelForce);
+              console.log("right", this.rightWheelSpeed, rightForcePosition, rightWheelForce);
+              console.log("left",this.leftWheelSpeed, leftForcePosition, leftWheelForce);
 
-    }*/
+            }
 
-
+*/
         Body.applyForce(this.robot, leftForcePosition, leftWheelForce);
         Body.applyForce(this.robot, rightForcePosition, rightWheelForce);
 
