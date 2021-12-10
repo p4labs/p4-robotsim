@@ -16,6 +16,9 @@ export class TwoWheelRobot {
     robotInitialPosition : Vector;
     robotInitialAngle : number;
 
+    robotMass : number = 100000;
+    robotFrictionAir:number = 0.2;
+
     ultrasonicSensor : Body;
     static readonly maxUltrasonicDistance = 200;
     ultrasonicSensorDistance : number;
@@ -75,8 +78,8 @@ export class TwoWheelRobot {
         Body.setDensity(this.ultrasonicSensor, 0);
         //create the robot from parts
         this.robot = Body.create({parts: [this.robotBody, this.leftWheelBody, this.rightWheelBody, this.ultrasonicSensor,]});
-        this.robot.frictionAir = 0.2;
-        Body.setMass(this.robot, 100000);
+        this.robot.frictionAir = this.robotFrictionAir;
+        Body.setMass(this.robot, this.robotMass);
         this.robotInitialPosition = robotInitialPosition;
         this.robotInitialAngle = robotInitialAngle;
 
