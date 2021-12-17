@@ -54,8 +54,12 @@ export class AVRRunner {
   private cpuTimeMS = 0;
   private cpuTimeMicroS = 0;
 
+  private isStopped = false;
+
   // CPU main loop
   execute(callback: (cpu: CPU) => void) {
+      if(this.isStopped)
+          return;
     const cyclesToRun = this.cpu.cycles + this.workUnitCycles;
     while (this.cpu.cycles < cyclesToRun) {
       avrInstruction(this.cpu);
@@ -95,13 +99,17 @@ export class AVRRunner {
       }
 
     }
+      callback(this.cpu);
+      requestAnimationFrame(() => this.execute(callback));
 
-    callback(this.cpu);
-    this.taskScheduler.postTask(() => this.execute(callback));
   }
-
+  start(callback: (cpu: CPU) => void){
+      this.isStopped = false;
+      this.execute(callback);
+  }
   stop() {
-    this.taskScheduler.stop();
+    //this.taskScheduler.stop();
+      this.isStopped = true;
   }
 
 

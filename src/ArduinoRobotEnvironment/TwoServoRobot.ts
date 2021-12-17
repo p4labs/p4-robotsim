@@ -1,5 +1,6 @@
 import {TwoWheelRobot} from "../robots";
 import {ArduinoUno, Servo, UltrasonicSensor} from "../Arduino";
+import {sensorPosition} from "../robots/TwoWheelRobot";
 
 
 export class TwoServoRobot {
@@ -7,7 +8,8 @@ export class TwoServoRobot {
     public arduino : ArduinoUno | null = null;
     public servoLeft : Servo = new Servo(9, "leftServo");
     public servoRight : Servo = new Servo(10, "rightServo");
-    public ultrasonic : UltrasonicSensor = new UltrasonicSensor(11, 12);
+    public ultrasonicSensors : {[position: string]: {sensor: UltrasonicSensor, triggerPin: number, echoPin: number}} = {}
+
     public environment : TwoWheelRobot | null = null;
 
 
@@ -19,7 +21,10 @@ export class TwoServoRobot {
         //connect the servos
         this.arduino.addConnection(9, this.servoLeft);
         this.arduino.addConnection(10, this.servoRight);
-        this.arduino.addConnection(11, this.ultrasonic);
+
+
+
+
 
         //add arduino events
         //update the wheel speeds from servo components
@@ -30,32 +35,63 @@ export class TwoServoRobot {
             //console.log("Left: ", leftServoSpeed,this.servoLeft.getWidthOfLastPulse(),"\nRight: ", rightServoSpeed, this.servoRight.getWidthOfLastPulse());
         })
 
-        //apply the force on the wheels
         this.arduino.addCPUEvent(50, () => {
+            //apply the force on the wheels
             this.environment?.applyForces();
+            //update the sensor distances
+            for(const key in this.ultrasonicSensors){
+                this.ultrasonicSensors[key].sensor.setDistanceOfObstacle(this.environment.ultrasonicSensorDistances[key]);
+            }
+
+
         })
         this.arduino.addCPUEvent(50, () => {
-            this.environment?.tick(1000);
+             this.environment?.tick(1000);
+
         })
         this.arduino.addCPUEventMicrosecond(5, (cpuCycles : number) => {
             if(this.environment)
-                this.ultrasonic.setDistanceOfObstacle(this.environment.ultrasonicSensorDistance);
-            this.arduino?.writeDigitalPin(this.ultrasonic.getEchoPin(), this.ultrasonic.getEchoPinState(cpuCycles));
+            {
+                for(const key in this.ultrasonicSensors)
+                {
+
+                    this.arduino?.writeDigitalPin(this.ultrasonicSensors[key].sensor.getEchoPin(), this.ultrasonicSensors[key].sensor.getEchoPinState(cpuCycles));
+
+                }
+
+            }
         })
 
+    }
+
+    addUltrasonicSensor(position : sensorPosition, triggerPin: number, echoPin: number){
+        this.ultrasonicSensors[position] = {
+            sensor: new UltrasonicSensor(triggerPin, echoPin, position),
+            triggerPin, echoPin
+        }
+
+        this.arduino.addConnection(triggerPin, this.ultrasonicSensors[position].sensor);
+        this.environment.addUltrasonicSensor(position);
     }
 
     run(hex: string)
     {
         this.environment?.reset();
         this.environment?.tick(100);
+        for(const key in this.ultrasonicSensors){
+            this.ultrasonicSensors[key].sensor.setDistanceOfObstacle(this.environment.ultrasonicSensorDistances[key]);
+        }
         this.arduino?.executeProgram(hex);
     }
 
     stop()
     {
         this.arduino?.stopExecute();
-        this.servoLeft.widthOfLastPulse = 1.4;
-        this.servoRight.widthOfLastPulse = 1.4;
+        this.servoLeft.reset();
+        this.servoRight.reset();
+        for(const key in this.ultrasonicSensors){
+            this.ultrasonicSensors[key].sensor.reset();
+        }
+
     }
 }

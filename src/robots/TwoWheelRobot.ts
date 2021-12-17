@@ -3,7 +3,7 @@ import {createPartCircle} from "./utils/CustomBodies"
 import { getTranformedPoint, findMinimumDistanceToObstacle } from "./utils/utils";
 
 type event = (robot : TwoWheelRobot) => any;
-
+export type sensorPosition = 'L1'| 'L2' | 'L3' | 'F1' | 'F2' | 'F3' | 'R1' | 'R2' | 'R3' | 'B1' | 'B2'| 'B3';
 export class TwoWheelRobot {
     private _canvas : any;
     private _engine : Engine;
@@ -16,12 +16,27 @@ export class TwoWheelRobot {
     robotInitialPosition : Vector;
     robotInitialAngle : number;
 
-    robotMass : number = 100000;
-    robotFrictionAir:number = 0.2;
+    robotMass : number = 1000;
+    robotFrictionAir:number = 0.5;
+    static readonly forceMultiplier = 0.003;
 
     ultrasonicSensor : Body;
-    static readonly maxUltrasonicDistance = 200;
-    ultrasonicSensorDistance : number;
+    static readonly maxUltrasonicDistance = 400;
+    static readonly ultrasonicSensorsOffset : {[position: string]: {x:number, y: number, angle: number}} = {
+        'L1': {x: -14, y: -9, angle: Math.PI/2},
+        'L2': {x: 0, y: -9, angle: Math.PI/2},
+        'L3': {x: 14, y:-9, angle: Math.PI/2},
+        'R1': {x: -14, y: 9, angle: -Math.PI/2},
+        'R2': {x: 0, y: 9, angle: -Math.PI/2},
+        'R3': {x: 14, y:9, angle: -Math.PI/2},
+        'F1': {x: 14, y:-9, angle: 0},
+        'F2': {x: 14, y: 0, angle: 0},
+        'F3': {x: 14, y: 9, angle: 0},
+        'B1': {x: -14, y:-9, angle: -Math.PI},
+        'B2': {x: -14, y: 0, angle: -Math.PI},
+        'B3': {x: -14, y: 9, angle: -Math.PI}
+    }
+    ultrasonicSensorDistances : { [position: string]: number; } = {};
 
     robot : Body;
 
@@ -29,7 +44,6 @@ export class TwoWheelRobot {
     coins : Array<Body>;
     removedCoins : Array<Body> = [];
 
-    static readonly forceMultiplier = 0.08;
     leftWheelSpeed : number;
     rightWheelSpeed : number;
     background : string;
@@ -61,28 +75,26 @@ export class TwoWheelRobot {
 
         this._runner = Runner.create();
 
+
+
         this.obstacles = [];
         this.coins = [];
         this.rightWheelSpeed = 0;
         this.leftWheelSpeed = 0;
-        this.ultrasonicSensorDistance = TwoWheelRobot.maxUltrasonicDistance;
 
         //create the robot body object
-        this.robotBody = Bodies.rectangle(100, 100, 50, 30, {render: {fillStyle : 'DarkRed'}} );
-        this.leftWheelBody = Bodies.rectangle(88, 82, 20, 6, {render: {fillStyle : 'black'}});
-        this.rightWheelBody = Bodies.rectangle(88, 118, 20, 6, {render: {fillStyle : 'black'}});
-        //create the ultrasonic sensor body
-        this.ultrasonicSensor = createPartCircle(110,-30, 50,200, -3*Math.PI/7,{label: 'ultrasonic'});
-        this.ultrasonicSensor.isSensor = true;
-        this.ultrasonicSensor.render.opacity = 0.2;
-        Body.setDensity(this.ultrasonicSensor, 0);
+        this.robotBody = Bodies.rectangle(100, 100, 30, 20, {render: {fillStyle : 'DarkRed'}} );
+        this.leftWheelBody = Bodies.rectangle(90, 90, 8, 2, {render: {fillStyle : 'black'}});
+        this.rightWheelBody = Bodies.rectangle(90, 110, 8, 2, {render: {fillStyle : 'black'}});
         //create the robot from parts
-        this.robot = Body.create({parts: [this.robotBody, this.leftWheelBody, this.rightWheelBody, this.ultrasonicSensor,]});
+        this.robot = Body.create({parts: [this.robotBody, this.leftWheelBody, this.rightWheelBody]});
         this.robot.frictionAir = this.robotFrictionAir;
         Body.setMass(this.robot, this.robotMass);
         this.robotInitialPosition = robotInitialPosition;
         this.robotInitialAngle = robotInitialAngle;
 
+        Body.setPosition(this.robot, this.robotInitialPosition);
+        Body.setAngle(this.robot, this.robotInitialAngle);
 
 
         World.add(this._engine.world, [this.robot, ]);//obstacle]);
@@ -90,24 +102,50 @@ export class TwoWheelRobot {
         Render.run(this._render);
         this.reset();
 
-        //add collision events to calculate obstacle distance
-        let self = this;
-        Events.on(this._engine, 'collisionActive',function(event) {self.onCollision(event);}) //;
-        Events.on(this._engine, 'collisionEnd', function(event ) {
-            const pairs = event.pairs;
 
-            pairs.forEach(({bodyA, bodyB}) => {
-                if((bodyA.label ==='ultrasonic' && bodyB.label === 'obstacle') ||
-                    (bodyB.label === 'ultrasonic' && bodyA.label === 'obstacle'))
-                {
-                    self.ultrasonicSensorDistance = TwoWheelRobot.maxUltrasonicDistance;
+
+        let self = this;
+
+        Events.on(this._render, 'afterRender', function() {
+            const ctx = self._render.context;
+            ctx.strokeStyle = 'rgba(50,0,255,0.05)';
+            ctx.lineWidth = 0.1;
+
+            for(const key in self.ultrasonicSensorDistances)
+            {
+                const startingPosition = getTranformedPoint(self.robot.position, self.robot.angle, TwoWheelRobot.ultrasonicSensorsOffset[key].x, TwoWheelRobot.ultrasonicSensorsOffset[key].y);
+                const startingAngle = self.robot.angle - TwoWheelRobot.ultrasonicSensorsOffset[key].angle + 7.5*Math.PI/180;
+
+                const numberOfRays = 15;
+                for(var i =0; i < numberOfRays; i+=1) {
+                    if(i%2) continue;
+                    const endPoint = getTranformedPoint(startingPosition, startingAngle - i * Math.PI / 180, TwoWheelRobot.maxUltrasonicDistance, 0);
+
+                    const x1 = startingPosition.x;
+                    const y1 = startingPosition.y;
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(endPoint.x, endPoint.y);
+                    ctx.stroke();
+
+
                 }
-            })
+            }
+
+
+            self.updateUltrasonicSensor();
+
+
+
         });
+        //add collision events to calculate obstacle distance
+        Events.on(this._engine, 'collisionActive',function(event) {self.onCollision(event);}) //;
 
 
     }
 
+    public addUltrasonicSensor(position : sensorPosition){
+        this.ultrasonicSensorDistances[position] = TwoWheelRobot.maxUltrasonicDistance;
+    }
     private onCollision(event : Matter.IEventCollision<Engine>)
     {
         const pairs = event.pairs;
@@ -115,32 +153,24 @@ export class TwoWheelRobot {
         let isLastCoin = false;
 
         pairs.forEach(({bodyA, bodyB}) => {
-            if(bodyA.label ==='ultrasonic' || bodyB.label === 'ultrasonic')
-            {
-                if(this.robot)
-                {
-                    this.updateUltrasonicSensor();
-                }
-            }
-            else if(bodyA.label === 'coin' && bodyB.label !== 'ultrasonic')
-            {
-                World.remove(this._engine.world, bodyA);
-                this.removedCoins.push(bodyA);
 
-                if(this.removedCoins.length === this.coins.length) isLastCoin = true;
-            }
-            else if(bodyB.label === 'coin' && bodyA.label !== 'ultrasonic')
+            let coinBody = null;
+            if(bodyA.label === 'coin')
             {
-                World.remove(this._engine.world, bodyB);
-                this.removedCoins.push(bodyB);
-                if(this.removedCoins.length === this.coins.length) isLastCoin = true;
+                coinBody = bodyA;
+            }
+            else if(bodyB.label === 'coin' )
+            {
+                coinBody = bodyB;
 
             }
-
+            if(coinBody !== null) {
+                World.remove(this._engine.world, coinBody);
+                this.removedCoins.push(coinBody);
+                if (this.removedCoins.length === this.coins.length) isLastCoin = true;
+            }
             if(isLastCoin && this.OnAllCoinsCollectedEvent)
             {
-                console.log("empty");
-
                 this.OnAllCoinsCollectedEvent(this);
             }
 
@@ -150,11 +180,15 @@ export class TwoWheelRobot {
     private updateUltrasonicSensor()
     {
 
-        const sensorStartingPoint = getTranformedPoint(this.robot.position, 0, 15, -10);
-        const startingAngle = this.robot.angle - 5*Math.PI/12;
-        this.ultrasonicSensorDistance = findMinimumDistanceToObstacle(sensorStartingPoint, startingAngle, TwoWheelRobot.maxUltrasonicDistance, this.obstacles);
-        if(this.ultrasonicSensorDistance > TwoWheelRobot.maxUltrasonicDistance)
-            this.ultrasonicSensorDistance = TwoWheelRobot.maxUltrasonicDistance;
+        for(const key in this.ultrasonicSensorDistances){
+            const sensorStartingPoint = getTranformedPoint(this.robot.position, this.robot.angle, TwoWheelRobot.ultrasonicSensorsOffset[key].x, TwoWheelRobot.ultrasonicSensorsOffset[key].y);
+            const startingAngle = this.robot.angle - TwoWheelRobot.ultrasonicSensorsOffset[key].angle + 7.5*Math.PI/180;
+
+            this.ultrasonicSensorDistances[key] = findMinimumDistanceToObstacle(sensorStartingPoint, startingAngle, TwoWheelRobot.maxUltrasonicDistance, this.obstacles);
+            if(this.ultrasonicSensorDistances[key] > TwoWheelRobot.maxUltrasonicDistance)
+                this.ultrasonicSensorDistances[key] = TwoWheelRobot.maxUltrasonicDistance;
+        }
+
 
     }
     addObstacleRectangle(posX : number, posY : number, width : number, height : number, color = "grey" ) : void {
@@ -177,9 +211,8 @@ export class TwoWheelRobot {
     private once = 0;
     applyForces() : void {
 
-        const leftForcePosition = getTranformedPoint(this.robotBody.position, this.robot.angle, 0, -20);
-        const rightForcePosition = getTranformedPoint(this.robotBody.position, this.robot.angle, 0, 20);
-
+        const leftForcePosition = getTranformedPoint(this.robotBody.position, this.robot.angle, 0, -10);
+        const rightForcePosition = getTranformedPoint(this.robotBody.position, this.robot.angle, 0, 10);
         let leftWheelForce = Vector.create(TwoWheelRobot.forceMultiplier*Math.abs(this.leftWheelSpeed), 0);
         leftWheelForce = Vector.rotate(leftWheelForce, this.robot.angle);
         if(this.leftWheelSpeed < 0)
@@ -189,29 +222,10 @@ export class TwoWheelRobot {
         rightWheelForce = Vector.rotate(rightWheelForce, this.robot.angle);
         if(this.rightWheelSpeed < 0)
             rightWheelForce = Vector.neg(rightWheelForce);
-/*
-          if( Math.floor(Math.random() * 10) == 0) {
 
-              const circle = Bodies.circle(leftForcePosition.x, leftForcePosition.y, 3,{isSensor: true});
-              const circle2 = Bodies.circle(leftForcePosition.x + leftWheelForce.x*100000, leftForcePosition.y + leftWheelForce.y*100000, 3, {isSensor:true});
-
-              World.add(this._engine.world, circle);
-                World.add(this._engine.world, circle2);
-
-              const circle3 = Bodies.circle(rightForcePosition.x, rightForcePosition.y, 3,{isSensor: true});
-              const circle4 = Bodies.circle(rightForcePosition.x + rightWheelForce.x*100000, rightForcePosition.y + rightWheelForce.y*100000, 3, {isSensor:true});
-
-              World.add(this._engine.world, circle3);
-              World.add(this._engine.world, circle4);
-
-              console.log("right", this.rightWheelSpeed, rightForcePosition, rightWheelForce);
-              console.log("left",this.leftWheelSpeed, leftForcePosition, leftWheelForce);
-
-            }
-
-*/
-        Body.applyForce(this.robot, leftForcePosition, leftWheelForce);
         Body.applyForce(this.robot, rightForcePosition, rightWheelForce);
+        Body.applyForce(this.robot, leftForcePosition, leftWheelForce);
+
 
     }
 
@@ -222,7 +236,8 @@ export class TwoWheelRobot {
 
     setRobotInitialPosition(position : Vector) : void
     {
-
+        this.robotInitialPosition = position;
+        this.setRobotPosition(this.robotInitialPosition);
     }
     run() {
         Runner.run(this._engine);
@@ -238,6 +253,8 @@ export class TwoWheelRobot {
         Body.setAngle(this.robot, this.robotInitialAngle);
         Body.setVelocity(this.robot, {x:0,y:0});
         Body.setAngularVelocity(this.robot,0);
+        this.leftWheelSpeed = 0;
+        this.rightWheelSpeed = 0;
         for(const coin of this.removedCoins)
         {
             World.addBody(this._engine.world, coin);

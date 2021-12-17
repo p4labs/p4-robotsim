@@ -91,12 +91,11 @@ export class ArduinoUno {
       if (this.serialOutputCallback)
         this.serialOutputCallback(String.fromCharCode(value));
 
-      console.log(String.fromCharCode(value))
     };
 
     const cpuPerf = new CPUPerformance(this.runner.cpu, MHZ);
 
-    this.runner.execute((cpu) => {
+    this.runner.start((cpu) => {
       const time = formatTime(cpu.cycles / MHZ);
       const speed = (cpuPerf.update() * 100).toFixed(0);
       if(this.simulationTimeCallback)
