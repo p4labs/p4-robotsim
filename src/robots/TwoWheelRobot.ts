@@ -18,7 +18,7 @@ export class TwoWheelRobot {
 
     robotMass : number = 1000;
     robotFrictionAir:number = 0.5;
-    static readonly forceMultiplier = 0.002;
+    static readonly forceMultiplier = 0.0015;
 
     ultrasonicSensor : Body;
     static readonly maxUltrasonicDistance = 400;

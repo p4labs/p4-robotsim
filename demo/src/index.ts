@@ -46,26 +46,24 @@ void stop(){
   rightservo.write(90);
 }
 void moveForward(){
-  leftservo.write(140);
-  rightservo.write(40);
-  delay(50);
-  leftservo.write(90);
-  rightservo.write(90);
+  leftservo.write(170);
+  rightservo.write(10);
+  
 }
 void moveAwayFromTheLeftWall(){
   leftservo.write(160);
   rightservo.write(160);
 
-  delay(200);
+  delay(600);
 
  leftservo.write(160);
   rightservo.write(20);
-  delay(300);
+  delay(500);
 
  leftservo.write(20);
   rightservo.write(20);
 
-  delay(200);
+  delay(600);
   leftservo.write(90);
   rightservo.write(90);
 }
@@ -74,16 +72,16 @@ void moveCloserToTheLeftWall(){
     leftservo.write(20);
   rightservo.write(20);
 
-  delay(433);
+  delay(600);
 
  leftservo.write(160);
   rightservo.write(20);
-  delay(100);
+  delay(500);
 
  leftservo.write(160);
   rightservo.write(160);
 
-  delay(433);
+  delay(600);
   leftservo.write(90);
   rightservo.write(90);
 }
