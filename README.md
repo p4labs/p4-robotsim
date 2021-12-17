@@ -2,23 +2,23 @@
 
 Arduino robot simulation built with Matterjs and AVR8js. Right now only 2WD Servo motor robot is supported. 
 
-## How it works?
+## How does it work?
 The simulation is adding a rigid body for the robot in free fall with no gravity! The movement of the robot happens by applying forces from the wheel position and in the direction of the robot.
 The amount of force is relative to the width of the last pulse outputted from the Uno to the servos. 
 
 Every 50ms the forces are applied depending on the width of the last pulse (if you think this is not accurate based on how servos work please start an issue and let us know!). 
 
 ## The physics of the robot
-There are few parameters that can be optimized:
+There are a few parameters that can be optimized.
 
 ### Mass of the robot 
-The mass of the robot is set to a large number. If a small number is used the simulation can be very unstable.
+The mass of the robot is set to a large number. If a small number is used the simulation can become unstable.
 
 In `TwoWheelRobot.ts` you can adjust `robotMass`. 
 
 ### Air Friction
-You have to think of the robot in free fall with no gravity and you are looking at a side view. That's totally not how the robot is, the robot is a 2D top view simulation. But the 2D physics is a side view 2D physics engine. 
-The higher the air friction that more resistance there is for the robot to move around. This variable can determine "the friction of the ground". 
+You need to think of the robot as being in free fall with no gravity and you are looking at a side view. That is perpendicular to the perspective of the robot which is a 2D top view simulation. But the physics is generated from a side view 2D physics engine. 
+The higher the air friction the more resistance there is for the robot to move. This variable determines the friction of the "ground". 
 
 In `TwoWheelRobot.ts` you can adjust `robotFrictionAir`.
 
