@@ -136,8 +136,11 @@ function initiateRobot(){
     const canvas = document.getElementById('world');
 
     const robot = new Robots.Arduino.TwoServoRobot(canvas)
-    robot.addUltrasonicSensor('L2', 2,3);
+    robot.addUltrasonicSensor('CFL', 2,3);
     robot.addUltrasonicSensor('F2', 4,5);
+    robot.addUltrasonicSensor('CFR', 2,3);
+    robot.addUltrasonicSensor('CBR', 4,5);robot.addUltrasonicSensor('CFL', 2,3);
+    robot.addUltrasonicSensor('CBL', 4,5);robot.addUltrasonicSensor('CFL', 2,3);
     robot.environment.setRobotInitialPosition({x:50, y: 100});
     robot.environment?.addObstacleRectangle(400, 50, 800, 20, "grey");
     robot.environment?.addObstacleRectangle(700, 200, 20, 800, "grey");

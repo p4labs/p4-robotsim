@@ -1,9 +1,21 @@
-import {Body, Engine, Render, Bodies, World, Vector, Runner, Events, Mouse, MouseConstraint} from "matter-js";
+import {
+    Body,
+    Engine,
+    Render,
+    Bodies,
+    World,
+    Vector,
+    Runner,
+    Events,
+    Mouse,
+    MouseConstraint,
+    Composite
+} from "matter-js";
 import {createPartCircle} from "./utils/CustomBodies"
 import { getTranformedPoint, findMinimumDistanceToObstacle } from "./utils/utils";
 
 type event = (robot : TwoWheelRobot) => any;
-export type sensorPosition = 'L1'| 'L2' | 'L3' | 'F1' | 'F2' | 'F3' | 'R1' | 'R2' | 'R3' | 'B1' | 'B2'| 'B3';
+export type sensorPosition = 'L1'| 'L2' | 'L3' | 'F1' | 'F2' | 'F3' | 'R1' | 'R2' | 'R3' | 'B1' | 'B2'| 'B3' | 'CFL' | 'CFR' | 'CBL' | 'CBR';
 export class TwoWheelRobot {
     private _canvas : any;
     private _engine : Engine;
@@ -17,8 +29,8 @@ export class TwoWheelRobot {
     robotInitialAngle : number;
 
     robotMass : number = 1000;
-    robotFrictionAir:number = 0.5;
-    static readonly forceMultiplier = 0.0015;
+    robotFrictionAir:number = 1;
+    static readonly forceMultiplier = 0.5;
 
     ultrasonicSensor : Body;
     static readonly maxUltrasonicDistance = 400;
@@ -34,7 +46,12 @@ export class TwoWheelRobot {
         'F3': {x: 14, y: 9, angle: 0},
         'B1': {x: -14, y:-9, angle: -Math.PI},
         'B2': {x: -14, y: 0, angle: -Math.PI},
-        'B3': {x: -14, y: 9, angle: -Math.PI}
+        'B3': {x: -14, y: 9, angle: -Math.PI},
+        'CFL': {x: 14, y:-9, angle: Math.PI/4},
+        'CFR': {x: 14, y: 9, angle: -Math.PI/4},
+        'CBL': {x: -14, y:-9, angle: -5*Math.PI/4},
+        'CBR': {x: -14, y: 9, angle: 5*Math.PI/4},
+
     }
     ultrasonicSensorDistances : { [position: string]: number; } = {};
 
@@ -99,6 +116,19 @@ export class TwoWheelRobot {
 
         World.add(this._engine.world, [this.robot, ]);//obstacle]);
 
+        /*
+        // add mouse control
+        const mouse = Mouse.create(this._canvas);
+
+         const mouseConstraint = MouseConstraint.create(this._engine, {
+                mouse: mouse
+            });
+
+        World.add(this._engine.world, mouseConstraint);
+        // keep the mouse in sync with rendering
+        this._render.mouse = mouse;
+        */
+
         Render.run(this._render);
         this.reset();
 
@@ -130,8 +160,17 @@ export class TwoWheelRobot {
 
                 }
             }
+            /*
+            //Add event with 'mousemove'
+            Events.on(mouseConstraint, 'mousemove', function (event) {
+                //For Matter.Query.point pass "array of bodies" and "mouse position"
 
+                //Your custom code here
+                console.log(event); //returns a shape corrisponding to the mouse position
 
+            });
+
+             */
             self.updateUltrasonicSensor();
 
 
@@ -208,24 +247,30 @@ export class TwoWheelRobot {
         this.leftWheelSpeed = left;
         this.rightWheelSpeed = right;
     }
-    private once = 0;
+    //TODO review if this is actually solving a bug or not
+    private starting = true;
     applyForces() : void {
-
+    if(!this.starting) {
         const leftForcePosition = getTranformedPoint(this.robotBody.position, this.robot.angle, 0, -10);
         const rightForcePosition = getTranformedPoint(this.robotBody.position, this.robot.angle, 0, 10);
-        let leftWheelForce = Vector.create(TwoWheelRobot.forceMultiplier*Math.abs(this.leftWheelSpeed), 0);
+        let leftWheelForce = Vector.create(TwoWheelRobot.forceMultiplier * Math.abs(this.leftWheelSpeed), 0);
         leftWheelForce = Vector.rotate(leftWheelForce, this.robot.angle);
-        if(this.leftWheelSpeed < 0)
+        if (this.leftWheelSpeed < 0)
             leftWheelForce = Vector.neg(leftWheelForce);
 
-        let rightWheelForce = Vector.create(TwoWheelRobot.forceMultiplier*Math.abs(this.rightWheelSpeed), 0);
+        let rightWheelForce = Vector.create(TwoWheelRobot.forceMultiplier * Math.abs(this.rightWheelSpeed), 0);
         rightWheelForce = Vector.rotate(rightWheelForce, this.robot.angle);
-        if(this.rightWheelSpeed < 0)
+        if (this.rightWheelSpeed < 0)
             rightWheelForce = Vector.neg(rightWheelForce);
 
-        Body.applyForce(this.robot, rightForcePosition, rightWheelForce);
         Body.applyForce(this.robot, leftForcePosition, leftWheelForce);
+        Body.applyForce(this.robot, rightForcePosition, rightWheelForce);
+    }
 
+    else
+    {
+        this.starting = false;
+    }
 
     }
 
@@ -253,6 +298,7 @@ export class TwoWheelRobot {
         Body.setAngle(this.robot, this.robotInitialAngle);
         Body.setVelocity(this.robot, {x:0,y:0});
         Body.setAngularVelocity(this.robot,0);
+        Body.update(this.robot, 10, 1,1);
         this.leftWheelSpeed = 0;
         this.rightWheelSpeed = 0;
         for(const coin of this.removedCoins)
@@ -261,7 +307,7 @@ export class TwoWheelRobot {
         }
         this.removedCoins = [];
 
-        this.tick(10);
+        //this.tick(10);
         this.updateUltrasonicSensor();
 
     }

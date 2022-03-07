@@ -4,7 +4,7 @@
       "target": "es2018",
       "baseUrl": "..",
       "rootDir": "..",
-      "lib": ["dom"],
+      "lib": ["dom", "ES2015"],
       "paths": {
         "p4robots": ["src"]
       }

@@ -28,7 +28,7 @@ export class TwoServoRobot {
 
         //add arduino events
         //update the wheel speeds from servo components
-        this.arduino.addCPUEvent(5, () => {
+        this.arduino.addCPUEvent(100, () => {
             const leftServoSpeed = (this.servoLeft.getWidthOfLastPulse() - 1.4);
             const rightServoSpeed = -1*(this.servoRight.getWidthOfLastPulse() - 1.4);
             this.environment?.setSpeeds(leftServoSpeed, rightServoSpeed);
@@ -43,12 +43,11 @@ export class TwoServoRobot {
                 this.ultrasonicSensors[key].sensor.setDistanceOfObstacle(this.environment.ultrasonicSensorDistances[key]);
             }
 
+            this.environment?.tick(50);
+
 
         })
-        this.arduino.addCPUEvent(50, () => {
-             this.environment?.tick(1000);
 
-        })
         this.arduino.addCPUEventMicrosecond(5, (cpuCycles : number) => {
             if(this.environment)
             {
@@ -77,7 +76,6 @@ export class TwoServoRobot {
     run(hex: string)
     {
         this.environment?.reset();
-        this.environment?.tick(100);
         for(const key in this.ultrasonicSensors){
             this.ultrasonicSensors[key].sensor.setDistanceOfObstacle(this.environment.ultrasonicSensorDistances[key]);
         }

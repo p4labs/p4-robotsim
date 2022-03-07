@@ -4,6 +4,7 @@ import {
   CPU,
   timer0Config,
   timer1Config,
+  timer2Config,
   AVRIOPort,
   AVRUSART,
   portBConfig,
@@ -12,7 +13,7 @@ import {
   usart0Config
 } from 'avr8js';
 import { loadHex } from './intelhex';
-import { MicroTaskScheduler } from './task-scheduler';
+
 type Event = {
   period : number,  //milliseconds
   eventCall : any
@@ -26,13 +27,13 @@ export class AVRRunner {
   readonly cpu: CPU;
   readonly timer0: AVRTimer;
   readonly timer1: AVRTimer;
+  readonly timer2: AVRTimer;
   readonly portB: AVRIOPort;
   readonly portC: AVRIOPort;
   readonly portD: AVRIOPort;
   readonly usart: AVRUSART;
   readonly speed = 16e6; // 16 MHZ
   readonly workUnitCycles = 500000;
-  readonly taskScheduler = new MicroTaskScheduler();
 
 
   //events
@@ -44,11 +45,11 @@ export class AVRRunner {
     this.cpu = new CPU(this.program);
     this.timer0 = new AVRTimer(this.cpu, timer0Config);
     this.timer1 = new AVRTimer(this.cpu, timer1Config);
+    this.timer2 = new AVRTimer(this.cpu, timer2Config);
     this.portB = new AVRIOPort(this.cpu, portBConfig);
     this.portC = new AVRIOPort(this.cpu, portCConfig);
     this.portD = new AVRIOPort(this.cpu, portDConfig);
     this.usart = new AVRUSART(this.cpu, usart0Config, this.speed);
-    this.taskScheduler.start();
   }
 
   private cpuTimeMS = 0;
