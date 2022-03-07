@@ -31,9 +31,9 @@ In `TwoWheelRobot.ts` you can adjust `forceMultiplier`
 The robot has dimensions of 30cmx20cm (maybe not accurate?).
 
 ## Ultrasonic Sensors
-There are 12 positions you can add an ultrasonic sensor. 3 positions on each side
+There are 16 positions you can add an ultrasonic sensor. 3 positions on each side and 1 at every corner. 
 ```typescript
-'L1'| 'L2' | 'L3' | 'F1' | 'F2' | 'F3' | 'R1' | 'R2' | 'R3' | 'B1' | 'B2'| 'B3';
+'L1'| 'L2' | 'L3' | 'F1' | 'F2' | 'F3' | 'R1' | 'R2' | 'R3' | 'B1' | 'B2'| 'B3' | 'CFL' | 'CFR' | 'CBL' | 'CBR';
 ```
 The positions of the ultrasonic sensors relative to the robot where 0,0 is the center of the robot are:
 ```typescript
@@ -48,7 +48,11 @@ The positions of the ultrasonic sensors relative to the robot where 0,0 is the c
     'F3': {x: 14, y: 9, angle: 0},
     'B1': {x: -14, y:-9, angle: -Math.PI},
     'B2': {x: -14, y: 0, angle: -Math.PI},
-    'B3': {x: -14, y: 9, angle: -Math.PI}
+    'B3': {x: -14, y: 9, angle: -Math.PI},
+    'CFL': {x: 14, y:-9, angle: Math.PI/4},
+    'CFR': {x: 14, y: 9, angle: -Math.PI/4},
+    'CBL': {x: -14, y:-9, angle: -5*Math.PI/4},
+    'CBR': {x: -14, y: 9, angle: 5*Math.PI/4},
 ```
 ## How to use the library?
 To learn more about how to use and run AVR8 simulation please check [avr8js](https://github.com/wokwi/avr8js).
