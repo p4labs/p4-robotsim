@@ -1,13 +1,15 @@
-import  * as _matterenvironments from './robots';
-import * as _arduinoenvironments from './ArduinoRobotEnvironment';
+import * as _matterenvironments from './enviroment';
+import * as _arduinoenvironments from './ArduinoRobot';
 
 export namespace Robots{
-    export namespace Matter {
-    export import TwoWheelRobot = _matterenvironments.TwoWheelRobot;
+  
+  export import SimulationEnviroment = _matterenvironments.SimulationEnviroment;
+
+  export namespace Matter {
+    export import TwoWheelRobot = _matterenvironments.TwoWheelRobotEnv;
+    
   }
-
-
-    export namespace Arduino {
+  export namespace Arduino {
     export import TwoServoRobot = _arduinoenvironments.TwoServoRobot;
   }
 

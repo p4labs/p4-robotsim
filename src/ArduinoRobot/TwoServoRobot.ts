@@ -1,6 +1,6 @@
-import {TwoWheelRobot} from "../robots";
+import {TwoWheelRobotEnv} from "../enviroment";
 import {ArduinoUno, Servo, UltrasonicSensor} from "../Arduino";
-import {sensorPosition} from "../robots/TwoWheelRobot";
+import {sensorPosition} from "../enviroment/TwoWheelRobotEnv";
 
 
 export class TwoServoRobot {
@@ -10,20 +10,16 @@ export class TwoServoRobot {
     public servoRight : Servo = new Servo(10, "rightServo");
     public ultrasonicSensors : {[position: string]: {sensor: UltrasonicSensor, triggerPin: number, echoPin: number}} = {}
 
-    public environment : TwoWheelRobot | null = null;
+    public environment : TwoWheelRobotEnv | null = null;
 
 
-
-    constructor(canvas:any, canvasBackground='white',  coinImagePath: string = "imgs/coin.png") {
-        this.environment = new TwoWheelRobot(canvas, undefined, undefined, canvasBackground, coinImagePath);
+    constructor(leftPin: number, rightPin: number) {
+        this.environment = new TwoWheelRobotEnv(undefined, undefined);
         this.arduino = new ArduinoUno();
 
         //connect the servos
-        this.arduino.addConnection(9, this.servoLeft);
-        this.arduino.addConnection(10, this.servoRight);
-
-
-
+        this.arduino.addConnection(leftPin, this.servoLeft);
+        this.arduino.addConnection(rightPin, this.servoRight);
 
 
         //add arduino events
@@ -44,8 +40,6 @@ export class TwoServoRobot {
             }
 
             this.environment?.tick(50);
-
-
         })
 
         this.arduino.addCPUEventMicrosecond(5, (cpuCycles : number) => {
