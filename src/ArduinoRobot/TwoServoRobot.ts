@@ -6,8 +6,8 @@ import {sensorPosition} from "../enviroment/TwoWheelRobotEnv";
 export class TwoServoRobot {
 
     public arduino : ArduinoUno | null = null;
-    public servoLeft : Servo = new Servo(9, "leftServo");
-    public servoRight : Servo = new Servo(10, "rightServo");
+    public servoLeft : Servo;
+    public servoRight : Servo;
     public ultrasonicSensors : {[position: string]: {sensor: UltrasonicSensor, triggerPin: number, echoPin: number}} = {}
 
     public environment : TwoWheelRobotEnv | null = null;
@@ -16,6 +16,9 @@ export class TwoServoRobot {
     constructor(leftPin: number, rightPin: number) {
         this.environment = new TwoWheelRobotEnv(undefined, undefined);
         this.arduino = new ArduinoUno();
+
+        this.servoLeft = new Servo(leftPin, "leftServo");
+        this.servoRight = new Servo(rightPin, "rightServo");
 
         //connect the servos
         this.arduino.addConnection(leftPin, this.servoLeft);

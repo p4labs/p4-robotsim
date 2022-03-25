@@ -3,6 +3,9 @@ import {getMilliSecconds} from "./Uno/format-time";
 
 const MHZ = 16000000;
 
+/**
+ * Ref: https://www.youtube.com/watch?v=1WnGv-DPexc
+ */
 export class Servo extends Component{
 
     widthOfLastPulse : number;
