@@ -20,6 +20,10 @@ export class Servo extends Component{
 
     getWidthOfLastPulse() : number { return this.widthOfLastPulse;}
 
+    getSpeed() : number {
+        return this.getWidthOfLastPulse() - 1.4;
+    }
+
     update(pinState : boolean, cpuCycles : number)
     {
         if(pinState)

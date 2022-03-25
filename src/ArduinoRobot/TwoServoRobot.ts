@@ -1,6 +1,6 @@
-import {TwoWheelRobotEnv} from "../enviroment";
+import {TwoWheelRobotEnv} from "../environment";
 import {ArduinoUno, Servo, UltrasonicSensor} from "../Arduino";
-import {sensorPosition} from "../enviroment/TwoWheelRobotEnv";
+import {sensorPosition} from "../environment/TwoWheelRobotEnv";
 
 
 export class TwoServoRobot {
@@ -28,8 +28,8 @@ export class TwoServoRobot {
         //add arduino events
         //update the wheel speeds from servo components
         this.arduino.addCPUEvent(100, () => {
-            const leftServoSpeed = (this.servoLeft.getWidthOfLastPulse() - 1.4);
-            const rightServoSpeed = -1*(this.servoRight.getWidthOfLastPulse() - 1.4);
+            const leftServoSpeed = this.servoLeft.getSpeed();
+            const rightServoSpeed = -1 * this.servoRight.getSpeed();
             this.environment?.setSpeeds(leftServoSpeed, rightServoSpeed);
             //console.log("Left: ", leftServoSpeed,this.servoLeft.getWidthOfLastPulse(),"\nRight: ", rightServoSpeed, this.servoRight.getWidthOfLastPulse());
         })
