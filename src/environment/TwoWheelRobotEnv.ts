@@ -11,7 +11,7 @@ import {
     MouseConstraint,
     Composite
 } from "matter-js";
-import { SimulationEnviroment } from "./SimulationEnviroment";
+import { SimulationEnvironment } from "./SimulationEnvironment";
 
 import {createPartCircle} from "./utils/CustomBodies"
 import { getTranformedPoint, findMinimumDistanceToObstacle } from "./utils/utils";
@@ -25,7 +25,7 @@ export class TwoWheelRobotEnv {
     rightWheelBody : Body;
     robotInitialPosition : Vector;
     robotInitialAngle : number;
-    simulation: SimulationEnviroment;
+    simulation: SimulationEnvironment;
 
     robotMass : number = 1000;
     robotFrictionAir:number = 1;
@@ -168,7 +168,7 @@ export class TwoWheelRobotEnv {
     }
 
 
-    setSimulation(env: SimulationEnviroment){
+    setSimulation(env: SimulationEnvironment){
         this.simulation = env;
     }
 

@@ -14,9 +14,9 @@ import {
 
 import { TwoWheelRobotEnv } from "./TwoWheelRobotEnv";
 
-type event = (env : SimulationEnviroment) => any;
+type event = (env : SimulationEnvironment) => any;
 
-export class SimulationEnviroment {
+export class SimulationEnvironment {
 
     private _engine : Engine;
     private _canvas : any;

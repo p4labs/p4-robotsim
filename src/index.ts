@@ -1,4 +1,4 @@
-import * as _matterenvironments from './enviroment';
+import * as _matterenvironments from './environment';
 import * as _arduinoenvironments from './ArduinoRobot';
 
 export namespace Robots{
