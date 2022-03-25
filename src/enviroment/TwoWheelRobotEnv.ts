@@ -66,10 +66,11 @@ export class TwoWheelRobotEnv {
 
         //create the robot body object
         this.robotBody = Bodies.rectangle(100, 100, 30, 20, {render: {fillStyle : 'DarkRed'}} );
-        this.leftWheelBody = Bodies.rectangle(90, 90, 8, 2, {render: {fillStyle : 'black'}});
-        this.rightWheelBody = Bodies.rectangle(90, 110, 8, 2, {render: {fillStyle : 'black'}});
+        this.leftWheelBody = Bodies.rectangle(90, 88, 8, 4, {render: {fillStyle : 'black'}});
+        this.rightWheelBody = Bodies.rectangle(90, 112, 8, 4, {render: {fillStyle : 'black'}});
         //create the robot from parts
         this.robot = Body.create({parts: [this.robotBody, this.leftWheelBody, this.rightWheelBody]});
+        
         this.robot.frictionAir = this.robotFrictionAir;
         Body.setMass(this.robot, this.robotMass);
         this.robotInitialPosition = robotInitialPosition;
@@ -121,28 +122,37 @@ export class TwoWheelRobotEnv {
     }
     //TODO review if this is actually solving a bug or not
     private starting = true;
+
+
+    /**
+     * The movement of the robot happens by applying forces from the wheel position and 
+     * in the direction of the robot. The amount of force is relative to the width of the 
+     * last pulse outputted from the Uno to the servos.
+     * 
+     * Every 50ms the forces are applied depending on the width of the last pulse
+     */
     applyForces() : void {
-    if(!this.starting) {
-        const leftForcePosition = getTranformedPoint(this.robotBody.position, this.robot.angle, 0, -10);
-        const rightForcePosition = getTranformedPoint(this.robotBody.position, this.robot.angle, 0, 10);
-        let leftWheelForce = Vector.create(TwoWheelRobotEnv.forceMultiplier * Math.abs(this.leftWheelSpeed), 0);
-        leftWheelForce = Vector.rotate(leftWheelForce, this.robot.angle);
-        if (this.leftWheelSpeed < 0)
-            leftWheelForce = Vector.neg(leftWheelForce);
+        if(!this.starting) {
+            const leftForcePosition = getTranformedPoint(this.robotBody.position, this.robot.angle, 0, -10);
+            const rightForcePosition = getTranformedPoint(this.robotBody.position, this.robot.angle, 0, 10);
+            let leftWheelForce = Vector.create(TwoWheelRobotEnv.forceMultiplier * Math.abs(this.leftWheelSpeed), 0);
+            leftWheelForce = Vector.rotate(leftWheelForce, this.robot.angle);
+            if (this.leftWheelSpeed < 0)
+                leftWheelForce = Vector.neg(leftWheelForce);
 
-        let rightWheelForce = Vector.create(TwoWheelRobotEnv.forceMultiplier * Math.abs(this.rightWheelSpeed), 0);
-        rightWheelForce = Vector.rotate(rightWheelForce, this.robot.angle);
-        if (this.rightWheelSpeed < 0)
-            rightWheelForce = Vector.neg(rightWheelForce);
+            let rightWheelForce = Vector.create(TwoWheelRobotEnv.forceMultiplier * Math.abs(this.rightWheelSpeed), 0);
+            rightWheelForce = Vector.rotate(rightWheelForce, this.robot.angle);
+            if (this.rightWheelSpeed < 0)
+                rightWheelForce = Vector.neg(rightWheelForce);
 
-        Body.applyForce(this.robot, leftForcePosition, leftWheelForce);
-        Body.applyForce(this.robot, rightForcePosition, rightWheelForce);
-    }
+            Body.applyForce(this.robot, leftForcePosition, leftWheelForce);
+            Body.applyForce(this.robot, rightForcePosition, rightWheelForce);
+        }
 
-    else
-    {
-        this.starting = false;
-    }
+        else
+        {
+            this.starting = false;
+        }
 
     }
 
