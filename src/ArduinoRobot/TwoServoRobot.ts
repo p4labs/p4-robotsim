@@ -1,36 +1,35 @@
-import {TwoWheelRobot} from "../robots";
+import {TwoWheelRobotEnv} from "../environment";
 import {ArduinoUno, Servo, UltrasonicSensor} from "../Arduino";
-import {sensorPosition} from "../robots/TwoWheelRobot";
+import {sensorPosition} from "../environment/TwoWheelRobotEnv";
 
 
 export class TwoServoRobot {
 
     public arduino : ArduinoUno | null = null;
-    public servoLeft : Servo = new Servo(9, "leftServo");
-    public servoRight : Servo = new Servo(10, "rightServo");
+    public servoLeft : Servo;
+    public servoRight : Servo;
     public ultrasonicSensors : {[position: string]: {sensor: UltrasonicSensor, triggerPin: number, echoPin: number}} = {}
 
-    public environment : TwoWheelRobot | null = null;
+    public environment : TwoWheelRobotEnv | null = null;
 
 
-
-    constructor(canvas:any, canvasBackground='white',  coinImagePath: string = "imgs/coin.png") {
-        this.environment = new TwoWheelRobot(canvas, undefined, undefined, canvasBackground, coinImagePath);
+    constructor(leftPin: number, rightPin: number) {
+        this.environment = new TwoWheelRobotEnv(undefined, undefined);
         this.arduino = new ArduinoUno();
 
+        this.servoLeft = new Servo(leftPin, "leftServo");
+        this.servoRight = new Servo(rightPin, "rightServo");
+
         //connect the servos
-        this.arduino.addConnection(9, this.servoLeft);
-        this.arduino.addConnection(10, this.servoRight);
-
-
-
+        this.arduino.addConnection(leftPin, this.servoLeft);
+        this.arduino.addConnection(rightPin, this.servoRight);
 
 
         //add arduino events
         //update the wheel speeds from servo components
         this.arduino.addCPUEvent(100, () => {
-            const leftServoSpeed = (this.servoLeft.getWidthOfLastPulse() - 1.4);
-            const rightServoSpeed = -1*(this.servoRight.getWidthOfLastPulse() - 1.4);
+            const leftServoSpeed = this.servoLeft.getSpeed();
+            const rightServoSpeed = -1 * this.servoRight.getSpeed();
             this.environment?.setSpeeds(leftServoSpeed, rightServoSpeed);
             //console.log("Left: ", leftServoSpeed,this.servoLeft.getWidthOfLastPulse(),"\nRight: ", rightServoSpeed, this.servoRight.getWidthOfLastPulse());
         })
@@ -44,8 +43,6 @@ export class TwoServoRobot {
             }
 
             this.environment?.tick(50);
-
-
         })
 
         this.arduino.addCPUEventMicrosecond(5, (cpuCycles : number) => {

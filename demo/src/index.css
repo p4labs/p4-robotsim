@@ -77,6 +77,6 @@ canvas {
 
 .robot-environment{
   margin: 20px;
-
+  border: 2px solid #C2C2C2;
 }
 
