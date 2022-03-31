@@ -35,7 +35,7 @@ export class SimulationEnvironment {
 
 
 
-    constructor(robot:any, canvas:any, background = "imgs/room-background.jpg", coinImagePath: string = "imgs/coin.png") {
+    constructor(robot:any, canvas:any, background = "imgs/room-background.jpg", coinImagePath: string = "imgs/coin.png", width=800, height=800) {
         this.obstacles = [];
         this.coins = [];
         this.robotEnv = robot.environment;
@@ -52,8 +52,8 @@ export class SimulationEnvironment {
             canvas: this._canvas,
             engine: this._engine,
             options: {
-                width: 800,
-                height: 800,
+                width: width,
+                height: height,
                 wireframes: false,
                 background: this.background,
                 showAngleIndicator: false,

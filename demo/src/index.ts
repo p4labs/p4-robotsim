@@ -44,7 +44,7 @@ function initiateRobot(){
     const canvas = document.getElementById('world');
 
     const robot = new Robots.Arduino.TwoServoRobot(9, 10);
-    const env =  new  Robots.SimulationEnvironment(robot, canvas);
+    const env =  new  Robots.SimulationEnvironment(robot, canvas, "white", "imgs/coin.png", 800, 800);
 
     robot.addUltrasonicSensor('L2', 5,6);
 
