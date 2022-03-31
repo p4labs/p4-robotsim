@@ -44,20 +44,51 @@ function initiateRobot(){
     const canvas = document.getElementById('world');
 
     const robot = new Robots.Arduino.TwoServoRobot(9, 10);
-    const env =  new  Robots.SimulationEnviroment(robot, canvas);
+    const env =  new  Robots.SimulationEnvironment(robot, canvas);
 
-    robot.addUltrasonicSensor('CFL', 2,3); // triggerPin,echoPin
-    robot.addUltrasonicSensor('F2', 4,5);
-    robot.addUltrasonicSensor('CFR', 6,7);
+    robot.addUltrasonicSensor('L2', 5,6);
+
     //robot.addUltrasonicSensor('CBR', 4,5);
     //robot.addUltrasonicSensor('CBL', 4,5);
-    robot.environment.setRobotInitialPosition({x:50, y: 100});
-    
-    env.addObstacleRectangle(400, 50, 800, 20, "grey");
-    env.addObstacleRectangle(700, 200, 20, 800, "grey");
 
-    env.addCoin(150,100);
-    env.addCoin(200, 150);
+    robot.environment.setRobotInitialPosition({
+        x: 100,
+        y: 80,
+    });
+    // env.addObstacleRectangle(0, 400, 20, 800);
+    env.addObstacleRectangle(300, 5, 400, 10);
+
+    env.addObstacleRectangle(610, 75, 10, 150);
+    env.addObstacleRectangle(400, 210, 420, 10);
+    env.addObstacleRectangle(150, 180, 110, 10, 0.5864306);
+
+    const cone1 = {x: 480, y: 110}
+    env.addObstacleRectangle(cone1.x, cone1.y-15, 34, 5, 0, "orange");
+    env.addObstacleRectangle(cone1.x, cone1.y+15, 34, 5, 0, "orange");
+    env.addObstacleRectangle(cone1.x-15, cone1.y, 5, 30, 0, "orange");
+    env.addObstacleRectangle(cone1.x+15, cone1.y, 5, 30, 0, "orange");
+
+    const cone2 = {x: 320, y: 110}
+    env.addObstacleRectangle(cone2.x, cone2.y-15, 34, 5, 0, "orange");
+    env.addObstacleRectangle(cone2.x, cone2.y+15, 34, 5, 0, "orange");
+    env.addObstacleRectangle(cone2.x-15, cone2.y, 5, 30, 0, "orange");
+    env.addObstacleRectangle(cone2.x+15, cone2.y, 5, 30, 0, "orange");
+
+    env.addCoin(250, 45);
+    env.addCoin(350, 45);
+   // env.addCoin(450, 45);
+
+    env.addCoin(250, 170);
+    env.addCoin(350, 170);
+    env.addCoin(450, 170);
+
+    env.addCoin(565, 80);
+    env.addCoin(565, 120);
+
+    env.addCoin(150, 130);
+    //env.addObstacleRectangle(400, 50, 800, 20, 0,"grey");
+
+
 
     env.OnAllCoinsCollectedEvent = (env) => {
         env.removedCoins = [];
@@ -65,7 +96,7 @@ function initiateRobot(){
         env.addCoin(400, 200);
         env.addCoin(500,500);
     }
-    
+
     robot.arduino.simulationTimeCallback = (time)=>{
         statusLabel.textContent = `Simulation time: ${time}`;
     }

@@ -1,97 +1,81 @@
 export const MOVE_CODE = `#include <Servo.h>
 Servo leftservo;  
 Servo rightservo;  
+const int pingPin = 5; // Trigger Pin of Ultrasonic Sensor
+const int echoPin = 6; // Echo Pin of Ultrasonic Sensor
 
-void setup() {
-  Serial.begin(9600);
-  leftservo.attach(9);  
-  rightservo.attach(10); 
-  //move forward fast
-  leftservo.write(90);
-  rightservo.write(90);
-
-  delay(500);
-  leftservo.write(180);
-  rightservo.write(0);
+const int distanceToCoints = 40;
+void moveCloserToWall()
+{
+  leftservo.write(10);
+  rightservo.write(10);
   delay(1000);
- 
-}
-void loop() {
-  float leftDistance = getDistance(2,3);
-  float frontDistance = getDistance(4,5);
-  Serial.print("Left: ");
-  Serial.print(leftDistance);
-  Serial.print(", Front: ");
-  Serial.println(frontDistance);
-  if(frontDistance < 50)
-  {
-      stop();
-      return;
-  }
-  if(leftDistance < 180)
-    moveAwayFromTheLeftWall();
-  else if(leftDistance > 220)
-    moveCloserToTheLeftWall();
-  else
-    moveForward();
-
-  delay(10);
-}
-void stop(){
-  leftservo.write(90);
-  rightservo.write(90);
-}
-void moveForward(){
   leftservo.write(170);
   rightservo.write(10);
-  
-}
-void moveAwayFromTheLeftWall(){
-  leftservo.write(160);
-  rightservo.write(160);
-
-  delay(600);
-
- leftservo.write(160);
-  rightservo.write(20);
-  delay(500);
-
- leftservo.write(20);
-  rightservo.write(20);
-
-  delay(600);
+    delay(500);
+  leftservo.write(170);
+  rightservo.write(170);
+  delay(1000);
   leftservo.write(90);
   rightservo.write(90);
 }
 
-void moveCloserToTheLeftWall(){
-    leftservo.write(20);
-  rightservo.write(20);
-
-  delay(600);
-
- leftservo.write(160);
-  rightservo.write(20);
-  delay(500);
-
- leftservo.write(160);
-  rightservo.write(160);
-
-  delay(600);
+void moveAwayFromWall()
+{
+  leftservo.write(170);
+  rightservo.write(170);
+  delay(1000);
+  leftservo.write(170);
+  rightservo.write(10);
+    delay(500);
+  leftservo.write(10);
+  rightservo.write(10);
+  delay(1000);
   leftservo.write(90);
   rightservo.write(90);
 }
 
-int getDistance(int trigger, int echo){
+void setup() {
+  leftservo.attach(9);  
+  rightservo.attach(10);
+   //set up the Serial
+  Serial.begin(9600);
+  //setupt the pin modes  
+  pinMode(pingPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  leftservo.write(90);
+  rightservo.write(90);
+
+
+}
+
+void loop() {
   long duration;  
   //clear the ping pin
-  digitalWrite(trigger, LOW);
+  digitalWrite(pingPin, LOW);
   delayMicroseconds(2);
   //send the 10 microsecond trigger
-  digitalWrite(trigger, HIGH);
+  digitalWrite(pingPin, HIGH);
   delayMicroseconds(10);
-  digitalWrite(trigger, LOW);
+  digitalWrite(pingPin, LOW);
   //get the pulse duration in microseconds
-  duration = pulseIn(echo, HIGH);
-  return duration/ 29 / 2;
-}`;
+  duration = pulseIn(echoPin, HIGH);
+  float distance = (duration / 2.0) / 29.0;
+  Serial.println(distance);
+  if(distance > (distanceToCoints +15))
+  {
+    moveCloserToWall();
+  }
+  else if (distance < (distanceToCoints - 15))
+  {
+    moveAwayFromWall();
+  }
+  else{
+    leftservo.write(170);
+  rightservo.write(10);
+  }
+
+
+  delay(50);  
+}
+`;

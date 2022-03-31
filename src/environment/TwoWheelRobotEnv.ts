@@ -66,11 +66,11 @@ export class TwoWheelRobotEnv {
 
         //create the robot body object
         this.robotBody = Bodies.rectangle(100, 100, 30, 20, {render: {fillStyle : 'DarkRed'}} );
-        this.leftWheelBody = Bodies.rectangle(90, 88, 8, 4, {render: {fillStyle : 'black'}});
-        this.rightWheelBody = Bodies.rectangle(90, 112, 8, 4, {render: {fillStyle : 'black'}});
+        this.leftWheelBody = Bodies.rectangle(90, 90, 8, 4, {render: {fillStyle : 'black'}});
+        this.rightWheelBody = Bodies.rectangle(90, 110, 8, 4, {render: {fillStyle : 'black'}});
         //create the robot from parts
         this.robot = Body.create({parts: [this.robotBody, this.leftWheelBody, this.rightWheelBody]});
-        
+
         this.robot.frictionAir = this.robotFrictionAir;
         Body.setMass(this.robot, this.robotMass);
         this.robotInitialPosition = robotInitialPosition;
@@ -80,7 +80,7 @@ export class TwoWheelRobotEnv {
         Body.setAngle(this.robot, this.robotInitialAngle);
 
 
-        
+
 
         /*
         // add mouse control
@@ -100,7 +100,7 @@ export class TwoWheelRobotEnv {
     public addUltrasonicSensor(position : sensorPosition){
         this.ultrasonicSensorDistances[position] = TwoWheelRobotEnv.maxUltrasonicDistance;
     }
-    
+
     private updateUltrasonicSensor()
     {
 
@@ -111,6 +111,9 @@ export class TwoWheelRobotEnv {
             this.ultrasonicSensorDistances[key] = findMinimumDistanceToObstacle(sensorStartingPoint, startingAngle, TwoWheelRobotEnv.maxUltrasonicDistance, this.simulation.obstacles);
             if(this.ultrasonicSensorDistances[key] > TwoWheelRobotEnv.maxUltrasonicDistance)
                 this.ultrasonicSensorDistances[key] = TwoWheelRobotEnv.maxUltrasonicDistance;
+
+            if(this.ultrasonicSensorDistances[key] < 5)
+                console.log("distance:" + this.ultrasonicSensorDistances[key])
         }
 
 
@@ -125,10 +128,10 @@ export class TwoWheelRobotEnv {
 
 
     /**
-     * The movement of the robot happens by applying forces from the wheel position and 
-     * in the direction of the robot. The amount of force is relative to the width of the 
+     * The movement of the robot happens by applying forces from the wheel position and
+     * in the direction of the robot. The amount of force is relative to the width of the
      * last pulse outputted from the Uno to the servos.
-     * 
+     *
      * Every 50ms the forces are applied depending on the width of the last pulse
      */
     applyForces() : void {
@@ -175,7 +178,7 @@ export class TwoWheelRobotEnv {
     render(render : Render){
 
         const ctx = render.context;
-        ctx.strokeStyle = 'rgba(50,0,255,0.05)';
+        ctx.strokeStyle = 'rgba(50,0,255,0.4)';
         ctx.lineWidth = 0.1;
 
         for(const key in this.ultrasonicSensorDistances)
@@ -224,7 +227,7 @@ export class TwoWheelRobotEnv {
         Body.update(this.robot, 10, 1,1);
         this.leftWheelSpeed = 0;
         this.rightWheelSpeed = 0;
-        
+
 
         //this.tick(10);
         this.updateUltrasonicSensor();

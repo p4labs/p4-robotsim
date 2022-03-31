@@ -45,7 +45,7 @@ export class TwoServoRobot {
             this.environment?.tick(50);
         })
 
-        this.arduino.addCPUEventMicrosecond(5, (cpuCycles : number) => {
+        this.arduino.addCPUEventMicrosecond(1, (cpuCycles : number) => {
             if(this.environment)
             {
                 for(const key in this.ultrasonicSensors)

@@ -17,6 +17,7 @@ export class UltrasonicSensor extends Component{
     private startingTimeOfEcho : number = 0;
     private startingCpuCyclesOfPulse : number = -1;
     private distanceOfObstacle : number = maxDistance;
+    private currentDistance: number = maxDistance;
 
     constructor(triggerPin : number, echoPin: number, label = "UltrasonicSensor")
     {
@@ -39,6 +40,7 @@ export class UltrasonicSensor extends Component{
             if(!this.pinState)   //if we are LOW
             {
                 this.startingCpuCyclesOfPulse = cpuCycles;
+                this.currentDistance = this.distanceOfObstacle;
             }
         }
         else
@@ -48,8 +50,9 @@ export class UltrasonicSensor extends Component{
                 const widthOfLastPulse = getMicroSeconds((cpuCycles - this.startingCpuCyclesOfPulse)/MHZ);
                 if(widthOfLastPulse >= 10 && widthOfLastPulse <= 20) //10 micros to trigger the echo + 10 error
                 {
-                    if(!this.echoPinState)
+                   // if(!this.echoPinState)
                     {
+                        this.echoPinState = false;
                         this.isTriggered = true;
                         this.startingTimeOfTrigger = Math.floor(cpuCycles*1000000/MHZ);
                     }
@@ -62,15 +65,15 @@ export class UltrasonicSensor extends Component{
 
     getEchoPinState(cpuCycles : number)
     {
-
         if(this.echoPinState)
         {
-            const targetDuration = this.distanceOfObstacle*2/0.0343;
+            const targetDuration = this.currentDistance*2/0.0343;
             const pulseDuration = Math.floor(cpuCycles*1000000/MHZ) - this.startingTimeOfEcho;
 
             if(pulseDuration >= targetDuration)    //flip the trigger down
             {
                 this.echoPinState = false;
+                //console.log(this.currentDistance + " " + pulseDuration + " " + targetDuration)
             }
         }
         else

@@ -33,7 +33,7 @@ export class SimulationEnvironment {
     background : string;
     coinImagePath: string;
 
-    
+
 
     constructor(robot:any, canvas:any, background = "imgs/room-background.jpg", coinImagePath: string = "imgs/coin.png") {
         this.obstacles = [];
@@ -82,8 +82,9 @@ export class SimulationEnvironment {
 
     }
 
-    addObstacleRectangle(posX : number, posY : number, width : number, height : number, color = "grey" ) : void {
+    addObstacleRectangle(posX : number, posY : number, width : number, height : number, angle = 0, color = "grey" ) : void {
         const obstacle = Bodies.rectangle(posX, posY, width, height, { isStatic: true, label: 'obstacle', render: {fillStyle : color} });
+        Body.rotate( obstacle, angle)
         this.obstacles.push(obstacle);
         World.add(this._engine.world, [obstacle]);
     }
@@ -129,7 +130,7 @@ export class SimulationEnvironment {
 
 
     render(){
-        
+
     }
 
     run() {
@@ -142,7 +143,7 @@ export class SimulationEnvironment {
 
     reset()
     {
-        
+
         for(const coin of this.removedCoins)
         {
             World.addBody(this._engine.world, coin);
