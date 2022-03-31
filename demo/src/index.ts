@@ -74,7 +74,7 @@ function initiateRobot(){
     env.addObstacleRectangle(cone2.x-15, cone2.y, 5, 30, 0, "orange");
     env.addObstacleRectangle(cone2.x+15, cone2.y, 5, 30, 0, "orange");
 
-    env.addCoin(250, 45);
+    env.addCoin(250, 45, 5);
     env.addCoin(350, 45);
    // env.addCoin(450, 45);
 

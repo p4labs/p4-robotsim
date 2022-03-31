@@ -88,11 +88,14 @@ export class SimulationEnvironment {
         this.obstacles.push(obstacle);
         World.add(this._engine.world, [obstacle]);
     }
-    addCoin(posX : number, posY : number){
-        const coin = Bodies.circle(posX, posY, 15, {isSensor: true, label: 'coin'});
+    addCoin(posX : number, posY : number, radius = 32){
+        const coin = Bodies.circle(posX, posY, radius, {isSensor: true, label: 'coin'});
 
         this.coins.push(coin);
         coin.render.sprite.texture = this.coinImagePath;
+        const coinSize = 32;
+        coin.render.sprite.yScale = radius/coinSize;
+        coin.render.sprite.xScale = radius/coinSize;
         World.add(this._engine.world, [coin]);
 
     }
